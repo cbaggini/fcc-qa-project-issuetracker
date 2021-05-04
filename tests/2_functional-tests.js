@@ -20,18 +20,54 @@ suite("Functional Tests", function () {
       })
       .end(function (err, res) {
         assert.equal(res.status, 200);
-        assert.equal(
-          res.text,
-          '{"issue_title":"test","issue_text":"test","created_by":"test","assigned_to":"test","status_text":"test", "created_on":"todo", "updated_on":"todo", "open":true, "_id":"todo"}'
-        );
+        assert.include(res.text, "issue_title");
+        done();
+      });
+  });
+  test("Create an issue with only required fields: POST request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .post("/api/issues/apitest")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .send({
+        issue_title: "test",
+        issue_text: "test",
+        created_by: "test",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        assert.include(res.text, "issue_title");
+        done();
+      });
+  });
+  test("Create an issue with missing required fields: POST request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .post("/api/issues/apitest")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .send({
+        issue_title: "test",
+        created_by: "test",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 400);
+        assert.equal(res.text, '{ "error": "required field(s) missing" }');
+        done();
+      });
+  });
+  test("View issues on a project: GET request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .get("/api/issues/apitest")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        assert.equal(Array.isArray(eval(res.text)), true);
         done();
       });
   });
 });
 
-// Create an issue with only required fields: POST request to /api/issues/{project}
-// Create an issue with missing required fields: POST request to /api/issues/{project}
-// View issues on a project: GET request to /api/issues/{project}
 // View issues on a project with one filter: GET request to /api/issues/{project}
 // View issues on a project with multiple filters: GET request to /api/issues/{project}
 // Update one field on an issue: PUT request to /api/issues/{project}
