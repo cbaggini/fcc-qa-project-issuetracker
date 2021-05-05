@@ -39,10 +39,7 @@ module.exports = function (app) {
       let issues = JSON.parse(fs.readFileSync("./data/issues.json"));
       let project = req.params.project;
       let sentIssue = req.body;
-      if (
-        Object.keys(issues).includes(project) &&
-        requiredFields.every((val) => Object.keys(sentIssue).includes(val))
-      ) {
+      if (requiredFields.every((val) => Object.keys(sentIssue).includes(val))) {
         let newIssue = {
           issue_title: sentIssue.issue_title,
           issue_text: sentIssue.issue_text,
@@ -57,10 +54,8 @@ module.exports = function (app) {
         issues[project] = issues[project].concat(newIssue);
         fs.writeFileSync("./data/issues.json", JSON.stringify(issues, null, 2));
         res.status(200).json(newIssue);
-      } else if (Object.keys(issues).includes(project)) {
-        res.status(400).json({ error: "required field(s) missing" });
       } else {
-        res.status(404).json({ error: "project not found" });
+        res.status(400).json({ error: "required field(s) missing" });
       }
     })
 
@@ -91,7 +86,7 @@ module.exports = function (app) {
           .json({ result: "successfully updated", _id: update._id });
       } else if (
         fieldsToUpdate.includes("_id") &&
-        issues[project].some((el) => el._id === update._id)
+        fieldsToUpdate.length === 1
       ) {
         res
           .status(400)
