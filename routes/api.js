@@ -55,7 +55,6 @@ module.exports = function (app) {
           _id: uuidv4(),
         };
         issues[project] = issues[project].concat(newIssue);
-        console.log(issues);
         fs.writeFileSync("./data/issues.json", JSON.stringify(issues, null, 2));
         res.status(200).json(newIssue);
       } else if (Object.keys(issues).includes(project)) {

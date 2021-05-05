@@ -30,7 +30,7 @@ suite("Functional Tests", function () {
       .post("/api/issues/apitest")
       .set("content-type", "application/x-www-form-urlencoded")
       .send({
-        issue_title: "test1",
+        issue_title: "another title",
         issue_text: "test",
         created_by: "test",
       })
@@ -82,7 +82,7 @@ suite("Functional Tests", function () {
   test("View issues on a project with multiple filters: GET request to /api/issues/{project}", function (done) {
     chai
       .request(server)
-      .get("/api/issues/apitest?issue_text=test&issue_title=test1")
+      .get("/api/issues/apitest?issue_text=test&issue_title=test")
       .set("content-type", "application/x-www-form-urlencoded")
       .end(function (err, res) {
         assert.equal(res.status, 200);
