@@ -65,7 +65,42 @@ module.exports = function (app) {
     })
 
     .put(function (req, res) {
+      let issues = JSON.parse(fs.readFileSync("./data/issues.json"));
       let project = req.params.project;
+      let update = req.body;
+      let fieldsToUpdate = Object.keys(update);
+      if (
+        fieldsToUpdate.includes("_id") &&
+        issues[project].some((el) => el._id === update._id) &&
+        fieldsToUpdate.length > 1
+      ) {
+        issues[project] = issues[project].map((el) => {
+          if (update._id === el._id) {
+            return {
+              ...el,
+              ...update,
+              updated_on: new Date(),
+            };
+          } else {
+            return el;
+          }
+        });
+        fs.writeFileSync("./data/issues.json", JSON.stringify(issues, null, 2));
+        res
+          .status(200)
+          .json({ result: "successfully updated", _id: update._id });
+      } else if (
+        fieldsToUpdate.includes("_id") &&
+        issues[project].some((el) => el._id === update._id)
+      ) {
+        res
+          .status(400)
+          .json({ error: "no update field(s) sent", _id: update._id });
+      } else if (fieldsToUpdate.includes("_id")) {
+        res.status(400).json({ error: "could not update", _id: update._id });
+      } else {
+        res.status(400).json({ error: "missing _id" });
+      }
     })
 
     .delete(function (req, res) {

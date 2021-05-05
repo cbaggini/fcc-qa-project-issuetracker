@@ -6,6 +6,7 @@ const server = require("../server");
 chai.use(chaiHttp);
 
 suite("Functional Tests", function () {
+  const fs = require("fs");
   test("Create an issue with every field: POST request to /api/issues/{project}", function (done) {
     chai
       .request(server)
@@ -59,7 +60,6 @@ suite("Functional Tests", function () {
     chai
       .request(server)
       .get("/api/issues/apitest")
-      .set("content-type", "application/x-www-form-urlencoded")
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(Array.isArray(eval(res.text)), true);
@@ -71,7 +71,6 @@ suite("Functional Tests", function () {
     chai
       .request(server)
       .get("/api/issues/apitest?issue_text=test")
-      .set("content-type", "application/x-www-form-urlencoded")
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(Array.isArray(eval(res.text)), true);
@@ -83,7 +82,6 @@ suite("Functional Tests", function () {
     chai
       .request(server)
       .get("/api/issues/apitest?issue_text=test&issue_title=test")
-      .set("content-type", "application/x-www-form-urlencoded")
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(Array.isArray(eval(res.text)), true);
@@ -91,13 +89,90 @@ suite("Functional Tests", function () {
         done();
       });
   });
+  test("Update one field on an issue: PUT request to /api/issues/{project}", function (done) {
+    let issues = JSON.parse(fs.readFileSync("./data/issues.json"));
+    let id = issues.apitest[0]._id;
+    chai
+      .request(server)
+      .put("/api/issues/apitest?issue_text=test&issue_title=test")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .send({
+        _id: id,
+        issue_text: "single update",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        assert.equal(res.text.includes("successfully updated"), true);
+        done();
+      });
+  });
+  test("Update multiple fields on an issue: PUT request to /api/issues/{project}", function (done) {
+    let issues = JSON.parse(fs.readFileSync("./data/issues.json"));
+    let id = issues.apitest[0]._id;
+    chai
+      .request(server)
+      .put("/api/issues/apitest?issue_text=test&issue_title=test")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .send({
+        _id: id,
+        issue_title: "multiple update",
+        created_by: "multiple update",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        assert.equal(res.text.includes("successfully updated"), true);
+        done();
+      });
+  });
+  test("Update an issue with missing _id: PUT request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .put("/api/issues/apitest?issue_text=test&issue_title=test")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .send({
+        issue_title: "missing id",
+        created_by: "missing id",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 400);
+        assert.equal(res.text.includes("missing _id"), true);
+        done();
+      });
+  });
+  test("Update an issue with no fields to update: PUT request to /api/issues/{project}", function (done) {
+    let issues = JSON.parse(fs.readFileSync("./data/issues.json"));
+    let id = issues.apitest[0]._id;
+    chai
+      .request(server)
+      .put("/api/issues/apitest?issue_text=test&issue_title=test")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .send({
+        _id: id,
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 400);
+        assert.equal(res.text.includes("no update field(s) sent"), true);
+        done();
+      });
+  });
+  test("Update an issue with an invalid _id: PUT request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .put("/api/issues/apitest?issue_text=test&issue_title=test")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .send({
+        _id: "568XXXXX9-4319-bc89-ad089aab1da2",
+        issue_title: "wrong id",
+        created_by: "wrong id",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 400);
+        assert.equal(res.text.includes("could not update"), true);
+        done();
+      });
+  });
 });
 
-// Update one field on an issue: PUT request to /api/issues/{project}
-// Update multiple fields on an issue: PUT request to /api/issues/{project}
-// Update an issue with missing _id: PUT request to /api/issues/{project}
-// Update an issue with no fields to update: PUT request to /api/issues/{project}
-// Update an issue with an invalid _id: PUT request to /api/issues/{project}
 // Delete an issue: DELETE request to /api/issues/{project}
 // Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
 // Delete an issue with missing _id: DELETE request to /api/issues/{project}
