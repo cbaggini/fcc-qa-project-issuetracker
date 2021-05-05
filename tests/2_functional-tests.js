@@ -94,7 +94,7 @@ suite("Functional Tests", function () {
     let id = issues.apitest[0]._id;
     chai
       .request(server)
-      .put("/api/issues/apitest?issue_text=test&issue_title=test")
+      .put("/api/issues/apitest/")
       .set("content-type", "application/x-www-form-urlencoded")
       .send({
         _id: id,
@@ -111,7 +111,7 @@ suite("Functional Tests", function () {
     let id = issues.apitest[0]._id;
     chai
       .request(server)
-      .put("/api/issues/apitest?issue_text=test&issue_title=test")
+      .put("/api/issues/apitest/")
       .set("content-type", "application/x-www-form-urlencoded")
       .send({
         _id: id,
@@ -127,7 +127,7 @@ suite("Functional Tests", function () {
   test("Update an issue with missing _id: PUT request to /api/issues/{project}", function (done) {
     chai
       .request(server)
-      .put("/api/issues/apitest?issue_text=test&issue_title=test")
+      .put("/api/issues/apitest/")
       .set("content-type", "application/x-www-form-urlencoded")
       .send({
         issue_title: "missing id",
@@ -144,7 +144,7 @@ suite("Functional Tests", function () {
     let id = issues.apitest[0]._id;
     chai
       .request(server)
-      .put("/api/issues/apitest?issue_text=test&issue_title=test")
+      .put("/api/issues/apitest/")
       .set("content-type", "application/x-www-form-urlencoded")
       .send({
         _id: id,
@@ -158,7 +158,7 @@ suite("Functional Tests", function () {
   test("Update an issue with an invalid _id: PUT request to /api/issues/{project}", function (done) {
     chai
       .request(server)
-      .put("/api/issues/apitest?issue_text=test&issue_title=test")
+      .put("/api/issues/apitest/")
       .set("content-type", "application/x-www-form-urlencoded")
       .send({
         _id: "568XXXXX9-4319-bc89-ad089aab1da2",
@@ -171,8 +171,48 @@ suite("Functional Tests", function () {
         done();
       });
   });
+  test("Delete an issue: DELETE request to /api/issues/{project}", function (done) {
+    let issues = JSON.parse(fs.readFileSync("./data/issues.json"));
+    let id = issues.apitest[0]._id;
+    chai
+      .request(server)
+      .delete("/api/issues/apitest/")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .send({
+        _id: id,
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 204);
+        assert.equal(res.text.includes("successfully deleted"), true);
+        done();
+      });
+  });
+  test("Delete an issue with an invalid _id: DELETE request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .delete("/api/issues/apitest/")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .send({
+        _id: "568XXXXX9-4319-bc89-ad089aab1da2",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 400);
+        assert.equal(res.text.includes("could not delete"), true);
+        done();
+      });
+  });
+  test("Delete an issue with missing _id: DELETE request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .delete("/api/issues/apitest/")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .send({
+        issue_title: "missing id",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 400);
+        assert.equal(res.text.includes("missing _id"), true);
+        done();
+      });
+  });
 });
-
-// Delete an issue: DELETE request to /api/issues/{project}
-// Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
-// Delete an issue with missing _id: DELETE request to /api/issues/{project}
