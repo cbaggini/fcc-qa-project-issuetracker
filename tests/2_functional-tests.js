@@ -30,7 +30,7 @@ suite("Functional Tests", function () {
       .post("/api/issues/apitest")
       .set("content-type", "application/x-www-form-urlencoded")
       .send({
-        issue_title: "test",
+        issue_title: "test1",
         issue_text: "test",
         created_by: "test",
       })
@@ -63,13 +63,36 @@ suite("Functional Tests", function () {
       .end(function (err, res) {
         assert.equal(res.status, 200);
         assert.equal(Array.isArray(eval(res.text)), true);
+        assert.equal(res.text.length, 2);
+        done();
+      });
+  });
+  test("View issues on a project with one filter: GET request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .get("/api/issues/apitest?issue_text=test")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        assert.equal(Array.isArray(eval(res.text)), true);
+        assert.equal(res.text.length, 2);
+        done();
+      });
+  });
+  test("View issues on a project with multiple filters: GET request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .get("/api/issues/apitest?issue_text=test&issue_title=test1")
+      .set("content-type", "application/x-www-form-urlencoded")
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        assert.equal(Array.isArray(eval(res.text)), true);
+        assert.equal(res.text.length, 1);
         done();
       });
   });
 });
 
-// View issues on a project with one filter: GET request to /api/issues/{project}
-// View issues on a project with multiple filters: GET request to /api/issues/{project}
 // Update one field on an issue: PUT request to /api/issues/{project}
 // Update multiple fields on an issue: PUT request to /api/issues/{project}
 // Update an issue with missing _id: PUT request to /api/issues/{project}

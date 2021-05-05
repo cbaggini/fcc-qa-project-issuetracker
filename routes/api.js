@@ -17,6 +17,7 @@ module.exports = function (app) {
 
     .post(function (req, res) {
       let project = req.params.project;
+      res.send(project);
     })
 
     .put(function (req, res) {
