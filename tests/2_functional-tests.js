@@ -182,7 +182,7 @@ suite("Functional Tests", function () {
         _id: id,
       })
       .end(function (err, res) {
-        assert.equal(res.status, 204);
+        assert.equal(res.status, 200);
         assert.equal(res.text.includes("successfully deleted"), true);
         done();
       });

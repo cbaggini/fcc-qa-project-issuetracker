@@ -104,6 +104,20 @@ module.exports = function (app) {
     })
 
     .delete(function (req, res) {
+      let issues = JSON.parse(fs.readFileSync("./data/issues.json"));
       let project = req.params.project;
+      let body = req.body;
+      if (
+        Object.keys(body).includes("_id") &&
+        issues[project].some((el) => el._id === body._id)
+      ) {
+        issues[project] = issues[project].filter((el) => el._id !== body._id);
+        fs.writeFileSync("./data/issues.json", JSON.stringify(issues, null, 2));
+        res.status(200).json({ result: "successfully deleted", _id: body._id });
+      } else if (Object.keys(body).includes("_id")) {
+        res.status(400).json({ error: "could not delete", _id: body._id });
+      } else {
+        res.status(400).json({ error: "missing _id" });
+      }
     });
 };
