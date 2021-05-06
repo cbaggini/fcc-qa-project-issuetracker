@@ -51,7 +51,12 @@ module.exports = function (app) {
           open: true,
           _id: uuidv4(),
         };
-        issues[project] = issues[project].concat(newIssue);
+        if (issues[project]) {
+          issues[project] = issues[project].concat(newIssue);
+        } else {
+          issues[project] = [newIssue];
+        }
+
         fs.writeFileSync("./data/issues.json", JSON.stringify(issues, null, 2));
         res.status(200).json(newIssue);
       } else {
